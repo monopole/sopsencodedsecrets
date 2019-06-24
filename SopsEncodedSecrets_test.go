@@ -6,12 +6,50 @@ package main_test
 import (
 	"testing"
 
-	"sigs.k8s.io/kustomize/pkg/kusttest"
-	"sigs.k8s.io/kustomize/plugin"
+	"sigs.k8s.io/kustomize/v3/pkg/kusttest"
+	"sigs.k8s.io/kustomize/v3/pkg/plugins"
 )
 
+/*
+
+# Writing a portable test for sops is problematic,
+# because sops decoding assumes access to a local
+# private key in some form, and these test need
+# to run anywhere, and they don't use a real file
+# system.  Need to revisit this;
+# maybe we can stick the private key in an ENV var?
+# And use GPG instead of gcp_kms?
+
+# To try this plugin by itself with real data
+# in Google cloud kms, do the following:
+
+gcloud kms keyrings create sops --location global
+gcloud kms keys create sops-key --location global \
+    --keyring sops --purpose encryption
+gcloud kms keys list --location global --keyring sops
+
+project=$(\
+    gcloud kms keys list --location global --keyring sops |\
+    grep GOOGLE | cut -d" " -f1)
+echo $project
+
+go get -u go.mozilla.org/sops/cmd/sops
+
+cat <<'EOF' >/tmp/sec_clear.yaml
+VEGETABLE: carrot
+ROCKET: saturn-v
+FRUIT: apple
+CAR: dymaxion
+EOF
+
+# Put the output of the following command into
+# the encodedFileContent constant below:
+sops --encrypt --gcp-kms $project /tmp/sec_clear.yaml
+
+*/
+
 func TestSopsEncodedSecretsPlugin(t *testing.T) {
-	tc := plugin.NewEnvForTest(t).Set()
+	tc := plugins.NewEnvForTest(t).Set()
 	defer tc.Reset()
 
 	tc.BuildGoPlugin(
@@ -19,43 +57,6 @@ func TestSopsEncodedSecretsPlugin(t *testing.T) {
 
 	th := kusttest_test.NewKustTestPluginHarness(t, "/app")
 
-	/*
-
-	   # Writing a portable test for sops is problematic,
-	   # because sops decoding assumes access to a local
-	   # private key in some form, and these test need
-	   # to run anywhere, and they don't use a real file
-	   # system.  Need to revisit this;
-	   # maybe we can stick the private key in an ENV var?
-	   # And use GPG instead of gcp_kms?
-
-	   # To try this plugin by itself with real data
-	   # in Google cloud kms, do the following:
-
-	   gcloud kms keyrings create sops --location global
-	   gcloud kms keys create sops-key --location global \
-	       --keyring sops --purpose encryption
-	   gcloud kms keys list --location global --keyring sops
-
-	   project=$(\
-	       gcloud kms keys list --location global --keyring sops |\
-	       grep GOOGLE | cut -d" " -f1)
-	   echo $project
-
-	   go get -u go.mozilla.org/sops/cmd/sops
-
-	   cat <<'EOF' >/tmp/sec_clear.yaml
-	   VEGETABLE: carrot
-	   ROCKET: saturn-v
-	   FRUIT: apple
-	   CAR: dymaxion
-	   EOF
-
-	   # Put the output of the following command into
-	   # the encodedFileContent constant below:
-	   sops --encrypt --gcp-kms $project /tmp/sec_clear.yaml
-
-	*/
 	const encodedFileContent = `
 VEGETABLE: ENC[AES256_GCM,data:9mKo4gCm,iv:nkhvWPDbMkDeLXAhTxQOsCaz3ACAx4VS9CLR3tGe5zI=,tag:KIY4z/eE3DFnKHbHHB0ytQ==,type:str]
 ROCKET: ENC[AES256_GCM,data:6C7vnZYkh+Q=,iv:66/EAqulH7OtMMvSyMZSL5ZbktEm4Yj5S7g/Zb+XgUk=,tag:yEaxZs57fKn7Uebk+ouDDw==,type:str]
