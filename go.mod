@@ -16,10 +16,12 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/mozilla-services/yaml v0.0.0-20180922153656-28ffe5d0cafb // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2 // indirect
 	go.mozilla.org/gopgagent v0.0.0-20170926210634-4d7ea76ff71a // indirect
-	go.mozilla.org/sops v0.0.0-20190611200209-e9e1e87723c8 // indirect
+	go.mozilla.org/sops v0.0.0-20190611200209-e9e1e87723c8
 	google.golang.org/api v0.6.0 // indirect
 	google.golang.org/grpc v1.21.1 // indirect
-	sigs.k8s.io/kustomize/v3 v3.0.0-pre // indirect
+	sigs.k8s.io/kustomize/v3 v3.0.0
+	sigs.k8s.io/yaml v1.1.0
 )
